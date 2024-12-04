@@ -1,11 +1,9 @@
-
 package main
 
 import (
     "fmt"
     "os"
     "regexp"
-    //"strconv"
     "strings"
 )
 
@@ -17,7 +15,6 @@ func main () {
     }
 
     var max_len = 0
-
     var ans1 = 0
 
     //Process line
@@ -34,7 +31,6 @@ func main () {
         reversed_line := reverse(line)
         ans1 += find_xmas(reversed_line)
     }
-
 
     //Process column
     var columns = make([]string, max_len)
@@ -102,19 +98,20 @@ func main () {
     //Final process to count number of XMAS
     fmt.Println(ans1)
 
+
+    //PART 2 ================= PART 2
     var ans2 = 0
 
-   //Part 2 row 
-    for i := 0; i < len(lines) - 2; i++ {
-        pattern1 := `M.S|S.M`
-        pattern2 := `.A.`
+   // Pattern 1 for both row and column
+    pattern1 := `M.S`
+    pattern2 := `.A.`
+    pattern3 := `M.S`
 
+    //row
+    for i := 0; i < len(lines) - 2; i++ {
         indices1 := findMatchStarts(pattern1, lines[i]) // M.S
         indices2 := findMatchStarts(pattern2, lines[i+1]) // .A.
-        indices3 := findMatchStarts(pattern1, lines[i+2])// M.S
-        fmt.Println(indices1,"-----")
-        fmt.Println(indices2,"-----")
-        fmt.Println(indices3,"-----")
+        indices3 := findMatchStarts(pattern3, lines[i+2])// M.S
         for _, match1 := range indices1 {
             for _, match2 := range indices2 {
                 for _, match3 := range indices3 {
@@ -124,20 +121,12 @@ func main () {
                 }
             }
         }
-        fmt.Println(ans2)
     }
-
-    //Part 2 column
+    //column
     for i := 0; i < len(columns) - 2; i++ {
-        pattern1 := `M.S|S.M`
-        pattern2 := `.A.`
-
         indices1 := findMatchStarts(pattern1, columns[i]) // M.S
         indices2 := findMatchStarts(pattern2, columns[i+1]) // .A.
-        indices3 := findMatchStarts(pattern1, columns[i+2])// M.S
-        fmt.Println(indices1,"-----")
-        fmt.Println(indices2,"-----")
-        fmt.Println(indices3,"-----")
+        indices3 := findMatchStarts(pattern3, columns[i+2])// M.S
         for _, match1 := range indices1 {
             for _, match2 := range indices2 {
                 for _, match3 := range indices3 {
@@ -147,10 +136,48 @@ func main () {
                 }
             }
         }
-        fmt.Println(ans2)
     }
 
-    
+    fmt.Println("============================")
+
+    //Pattern 2 for row and column
+    pattern1_2 := `S.M`
+    pattern2_2 := `.A.`
+    pattern3_2 := `S.M`
+
+    //row
+    for i := 0; i < len(lines) - 2; i++ {
+
+        indices1 := findMatchStarts(pattern1_2, lines[i]) // M.S
+        indices2 := findMatchStarts(pattern2_2, lines[i+1]) // .A.
+        indices3 := findMatchStarts(pattern3_2, lines[i+2])// M.S
+        for _, match1 := range indices1 {
+            for _, match2 := range indices2 {
+                for _, match3 := range indices3 {
+                    if match3 == match2 && match2 == match1 {
+                        ans2++
+                    }
+                }
+            }
+        }
+    }
+
+    //column
+    for i := 0; i < len(columns) - 2; i++ {
+        indices1 := findMatchStarts(pattern1_2, columns[i]) // M.S
+        indices2 := findMatchStarts(pattern2_2, columns[i+1]) // .A.
+        indices3 := findMatchStarts(pattern3_2, columns[i+2])// M.S
+        for _, match1 := range indices1 {
+            for _, match2 := range indices2 {
+                for _, match3 := range indices3 {
+                    if match3 == match2 && match2 == match1 {
+                        ans2++
+                    }
+                }
+            }
+        }
+    }
+    //Print final result    
     fmt.Println(ans2)
 }
 
@@ -180,7 +207,6 @@ func findMatchStarts(pattern, text string) []int {
         }
 
     }
-
     return start_idxs
 }
 
@@ -200,7 +226,6 @@ func find_xmas(input string) int {
             total++
         }
     }
-
     return total
 }
 
@@ -213,6 +238,5 @@ func reverse (input string) string {
         output[i], output[len(output) - 1 - i] = output[len(output) - 1 - i], output[i]
 
     }
-
     return string(output)
 }
