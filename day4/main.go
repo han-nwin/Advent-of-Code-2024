@@ -107,15 +107,14 @@ func main () {
     
     for i := 0; i < len(lines) - 2; i++ {
         pattern1 := `M.S|S.M`
-
         pattern2 := `.A.`
+
         indices1 := findMatchStarts(pattern1, lines[i]) // M.S
         indices2 := findMatchStarts(pattern2, lines[i+1]) // .A.
         indices3 := findMatchStarts(pattern1, lines[i+2])// M.S
         fmt.Println(indices1,"-----")
         fmt.Println(indices2,"-----")
         fmt.Println(indices3,"-----")
-
         for _, match1 := range indices1 {
             for _, match2 := range indices2 {
                 for _, match3 := range indices3 {
@@ -126,8 +125,55 @@ func main () {
             }
         }
         fmt.Println(ans2)
-
     }
+
+    for i := 0; i < len(lines) - 2; i++ {
+        pattern1 := `M.M`
+        pattern2 := `.A.`
+        pattern3 := `S.S`
+
+        indices1 := findMatchStarts(pattern1, lines[i]) // M.S
+        indices2 := findMatchStarts(pattern2, lines[i+1]) // .A.
+        indices3 := findMatchStarts(pattern3, lines[i+2])// M.S
+        fmt.Println(indices1,"-----")
+        fmt.Println(indices2,"-----")
+        fmt.Println(indices3,"-----")
+        for _, match1 := range indices1 {
+            for _, match2 := range indices2 {
+                for _, match3 := range indices3 {
+                    if match3 == match2 && match2 == match1 {
+                        ans2++
+                    }
+                }
+            }
+        }
+        fmt.Println(ans2)
+    }
+
+
+    for i := 0; i < len(lines) - 2; i++ {
+        pattern1 := `S.S`
+        pattern2 := `.A.`
+        pattern3 := `M.M`
+
+        indices1 := findMatchStarts(pattern1, lines[i]) // M.S
+        indices2 := findMatchStarts(pattern2, lines[i+1]) // .A.
+        indices3 := findMatchStarts(pattern3, lines[i+2])// M.S
+        fmt.Println(indices1,"-----")
+        fmt.Println(indices2,"-----")
+        fmt.Println(indices3,"-----")
+        for _, match1 := range indices1 {
+            for _, match2 := range indices2 {
+                for _, match3 := range indices3 {
+                    if match3 == match2 && match2 == match1 {
+                        ans2++
+                    }
+                }
+            }
+        }
+        fmt.Println(ans2)
+    }
+    
     fmt.Println(ans2)
 }
 
@@ -137,26 +183,25 @@ func findMatchStarts(pattern, text string) []int {
     reg := regexp.MustCompile(pattern)
     start_idxs := []int{}
     for idx := 0; idx < len(text); idx++ {
-        location := reg.FindStringIndex(text[idx:]) //find each location
+        location := reg.FindStringIndex(text[idx:]) //find location at each slice
 
         if location == nil {
             break
-        } //no match found
+        }
 
+        absolute_idx := idx + location[0]
         flag := false
         for _, ele := range start_idxs {
-            if ele == location[0] {
+            //fmt.Println(ele)
+            if ele == absolute_idx {
                 flag = true
-                break
             }
         }
 
-        if flag == true {
-            continue
+        if !flag {
+            start_idxs = append(start_idxs, absolute_idx)
         }
 
-        start_idxs = append(start_idxs, idx + location[0])
-        
     }
 
     return start_idxs
