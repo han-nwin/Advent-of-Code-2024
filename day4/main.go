@@ -104,7 +104,7 @@ func main () {
 
     var ans2 = 0
 
-    
+   //Part 2 row 
     for i := 0; i < len(lines) - 2; i++ {
         pattern1 := `M.S|S.M`
         pattern2 := `.A.`
@@ -127,14 +127,14 @@ func main () {
         fmt.Println(ans2)
     }
 
-    for i := 0; i < len(lines) - 2; i++ {
-        pattern1 := `M.M`
+    //Part 2 column
+    for i := 0; i < len(columns) - 2; i++ {
+        pattern1 := `M.S|S.M`
         pattern2 := `.A.`
-        pattern3 := `S.S`
 
-        indices1 := findMatchStarts(pattern1, lines[i]) // M.S
-        indices2 := findMatchStarts(pattern2, lines[i+1]) // .A.
-        indices3 := findMatchStarts(pattern3, lines[i+2])// M.S
+        indices1 := findMatchStarts(pattern1, columns[i]) // M.S
+        indices2 := findMatchStarts(pattern2, columns[i+1]) // .A.
+        indices3 := findMatchStarts(pattern1, columns[i+2])// M.S
         fmt.Println(indices1,"-----")
         fmt.Println(indices2,"-----")
         fmt.Println(indices3,"-----")
@@ -150,29 +150,6 @@ func main () {
         fmt.Println(ans2)
     }
 
-
-    for i := 0; i < len(lines) - 2; i++ {
-        pattern1 := `S.S`
-        pattern2 := `.A.`
-        pattern3 := `M.M`
-
-        indices1 := findMatchStarts(pattern1, lines[i]) // M.S
-        indices2 := findMatchStarts(pattern2, lines[i+1]) // .A.
-        indices3 := findMatchStarts(pattern3, lines[i+2])// M.S
-        fmt.Println(indices1,"-----")
-        fmt.Println(indices2,"-----")
-        fmt.Println(indices3,"-----")
-        for _, match1 := range indices1 {
-            for _, match2 := range indices2 {
-                for _, match3 := range indices3 {
-                    if match3 == match2 && match2 == match1 {
-                        ans2++
-                    }
-                }
-            }
-        }
-        fmt.Println(ans2)
-    }
     
     fmt.Println(ans2)
 }
@@ -230,7 +207,8 @@ func find_xmas(input string) int {
 //Helper function to reverse a string
 func reverse (input string) string {
 
-    output := []rune(input) // convert string into []rune (UTF-8) int32
+    //NOTE: there's no char in Go. Either use rune or byte
+    output := []rune(input) // convert string into []rune (UTF-8) int32 (4bytes)
     for i := 0; i < len(output)/2; i++ {
         output[i], output[len(output) - 1 - i] = output[len(output) - 1 - i], output[i]
 
