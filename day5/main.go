@@ -85,6 +85,7 @@ func validate (table map[int][]int, str_list []string) (bool, int) {
 
     int_list := make([]int, len(str_list))
 
+    //NOTE: int_list is a int REVERSED list of str_list
     for i := 0; i < len(str_list); i++ {
         int_list[len(str_list) - 1 - i], _ = strconv.Atoi(str_list[i])
     }
@@ -105,9 +106,20 @@ func validate (table map[int][]int, str_list []string) (bool, int) {
                 fmt.Println(middle)
             }
             //NOTE: PART 2 here when flag == false reorder them
+            if !flag {
+                middle = reorder(int_list, table)
+            }
 
         }
     }
 
     return flag, middle
+}
+
+//helper function for PART2 reorder then get the middle
+func reorder(int_list []int, table map[int][]int) (int) {
+    var middle int
+
+    
+    return middle
 }
