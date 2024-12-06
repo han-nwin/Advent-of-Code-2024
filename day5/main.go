@@ -16,6 +16,7 @@ func main () {
     }
 
     var ans1 = 0
+    var ans2 = 0
 
     lines := strings.Split(string(data), "\n") // Array of lines
     lines = lines[:len(lines)-1] // Remove the last empty element created by split
@@ -71,10 +72,15 @@ func main () {
         flag, middle := validate(table, str_list)
         if flag && middle > -1 {
             ans1 += middle
-            fmt.Println("asn: ", ans1)
+            fmt.Println("ans1: ", ans1)
+        }
+        if !flag && middle > -1 {
+            ans2 += middle
+            fmt.Println("asn2: ", ans2)
         }
     }
     fmt.Println(ans1)
+    fmt.Println(ans2)
 
 }
 
@@ -103,11 +109,13 @@ func validate (table map[int][]int, str_list []string) (bool, int) {
 
             if flag {
                 middle = int_list[len(int_list)/2] 
-                fmt.Println(middle)
+                f//mt.Println(middle)
             }
-            //NOTE: PART 2 here when flag == false reorder them
+            //NOTE: PART 2 here when flag
             if !flag {
+                fmt.Println(int_list)
                 middle = reorder(int_list, table)
+                fmt.Println("part 2 middle: ", middle)
             }
 
         }
@@ -119,7 +127,19 @@ func validate (table map[int][]int, str_list []string) (bool, int) {
 //helper function for PART2 reorder then get the middle
 func reorder(int_list []int, table map[int][]int) (int) {
     var middle int
-
     
+    for count :=0; count < len(int_list); count++ {
+        for i, num := range int_list {
+            if values, exist := table[num]; exist {
+                for _, v := range values {
+                    if i+1 < len(int_list) && v == int_list[i+1] {
+                        //NOTE: do something here
+                        int_list[i], int_list[i+1] = int_list[i], int_list[i+1]
+                    }
+                } 
+            } 
+        }
+    }
+    middle = int_list[len(int_list)/2]
     return middle
 }
