@@ -35,6 +35,7 @@ func main () {
         table[key] = append(table[key], value)
     }
     
+    //Part 1 pattern
     pattern := `[0-9]+\|[0-9]+`
     reg := regexp.MustCompile(pattern)
     
@@ -53,34 +54,28 @@ func main () {
 
     }
 
-    fmt.Println(table)
-
-
+    //PART 2: pattern
     pattern2 := `[0-9]+,.*`
     reg2 := regexp.MustCompile(pattern2)
 
     for _, line := range lines {
         match_list2 := reg2.FindString(line)
-        //fmt.Println(match_list2)
         
         var str_list = []string{}
         if match_list2 != "" {
             str_list = strings.Split(match_list2, ",")
         }
-        //fmt.Println(str_list)
         
         flag, middle := validate(table, str_list)
         if flag && middle > -1 {
             ans1 += middle
-            fmt.Println("ans1: ", ans1)
         }
         if !flag && middle > -1 {
             ans2 += middle
-            fmt.Println("asn2: ", ans2)
         }
     }
-    fmt.Println(ans1)
-    fmt.Println(ans2)
+    fmt.Println("Part 1:", ans1)
+    fmt.Println("Part 2:", ans2)
 
 }
 
@@ -95,7 +90,6 @@ func validate (table map[int][]int, str_list []string) (bool, int) {
     for i := 0; i < len(str_list); i++ {
         int_list[len(str_list) - 1 - i], _ = strconv.Atoi(str_list[i])
     }
-    //fmt.Println(int_list)
     
     //iterate through revesed int list and check if the next element is a value of the curr in table
     //If yes -> flag it false
@@ -109,13 +103,14 @@ func validate (table map[int][]int, str_list []string) (bool, int) {
 
             if flag {
                 middle = int_list[len(int_list)/2] 
-                f//mt.Println(middle)
+                //fmt.Println(middle)
             }
             //NOTE: PART 2 here when flag
             if !flag {
-                fmt.Println(int_list)
-                middle = reorder(int_list, table)
-                fmt.Println("part 2 middle: ", middle)
+                for i := 0; i < len(int_list); i++ {
+                    switch_pos(int_list[i:], table)
+                }
+                middle = int_list[len(int_list)/2]
             }
 
         }
@@ -125,21 +120,15 @@ func validate (table map[int][]int, str_list []string) (bool, int) {
 }
 
 //helper function for PART2 reorder then get the middle
-func reorder(int_list []int, table map[int][]int) (int) {
-    var middle int
-    
-    for count :=0; count < len(int_list); count++ {
-        for i, num := range int_list {
-            if values, exist := table[num]; exist {
-                for _, v := range values {
-                    if i+1 < len(int_list) && v == int_list[i+1] {
-                        //NOTE: do something here
-                        int_list[i], int_list[i+1] = int_list[i], int_list[i+1]
-                    }
-                } 
+func switch_pos(int_list []int, table map[int][]int) {
+    for i, num := range int_list {
+        if values, exist := table[num]; exist {
+            for _, v := range values {
+                if i+1 < len(int_list) && v == int_list[i+1] {
+                    //NOTE: do something here
+                    int_list[i], int_list[i+1] = int_list[i+1], int_list[i]
+                }
             } 
-        }
+        } 
     }
-    middle = int_list[len(int_list)/2]
-    return middle
 }
