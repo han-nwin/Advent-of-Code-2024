@@ -38,7 +38,7 @@ func main() {
     //pattern to get position of the guard
     pattern := `v|\^|<|>`
     reg := regexp.MustCompile(pattern)
-    var pos []int = []int{-1,-1} // {row, col}
+    var pos  = []int{-1,-1} // {row, col}
 
     //Iterate through every line
     for i, line := range lines {
@@ -53,7 +53,7 @@ func main() {
         char_list := []rune(line)
         matrix = append(matrix, char_list)
     }
-    g.curr_pos = pos
+    g.curr_pos = []int{pos[0], pos[1]}
     g.Update()
     //Print the matrix and starting pos
     fmt.Println("Position: ", g.curr_pos)
@@ -69,11 +69,10 @@ func main() {
 
     //RUNING LOGIC
     flag := false
-    var e error
 
     for !flag {
-        //Before run mark the current pos as 'X'
-        if matrix[g.curr_pos[0]][g.curr_pos[1]] != 'X'{
+        // Before run mark current postion as X
+        if matrix[g.curr_pos[0]][g.curr_pos[1]] != 'X' {
             matrix[g.curr_pos[0]][g.curr_pos[1]] = 'X'
         }
 
@@ -89,35 +88,14 @@ func main() {
         }
          
         //Check if there is barrier ahead
-        if matrix[g.ahead[0]][g.ahead[1]] == '#' && !flag {
+        if matrix[g.ahead[0]][g.ahead[1]] == '#' {
             g.turn_90()
         }
 
-        flag, e = g.go_forward(matrix)
-        
-        if e != nil {
-            fmt.Println(e)
-            os.Exit(1)
-        }
-        fmt.Println(flag,e)
-        fmt.Println("New position: ", g.curr_pos)
-
-        if !flag {
-            matrix[g.curr_pos[0]][g.curr_pos[1]] = g.shape
-        }
-
-        /**
-        fmt.Printf("Shape: %c\n", g.shape)
-        for i, _ := range matrix {
-            for _, r := range matrix[i]{
-                fmt.Printf("%c ", r)
-            }
-            fmt.Println()
-        }
-        */
-
+        g.go_forward(matrix)
     }
-    for i, _ := range matrix {
+
+    for i := range matrix {
         for _, char := range matrix[i] {
             if char == 'X' {
                 ans1++
@@ -125,7 +103,107 @@ func main() {
         }
 
     } 
+    fmt.Printf("Final Shape: %c\n", g.shape)
+   /** for i := range matrix{
+        for _, r := range matrix[i]{
+            fmt.Printf("%c ", r)
+        }
+        fmt.Println()
+    } */
     fmt.Println("Part 1: ", ans1)
+
+    //Part 2
+    //How to test if it's never escape?
+    //NOTE: Visit the same position with the same direction
+
+    /**matrix2 := copy_matrix(matrix)
+    for i := range matrix2{
+        for _, r := range matrix2[i]{
+            fmt.Printf("%c ", r)
+        }
+        fmt.Println()
+    }*/
+
+    var ans2 = 0
+
+    //guard 2
+    var g2 guard
+    g2.Init() //initialize the guard
+    //Iterate through every line to initialize g2
+    for i, line := range lines {
+        //Look for position of guard
+        temp := reg.FindStringIndex(line)
+        if temp != nil {
+            pos[0] = i
+            pos[1] = temp[0]
+            g2.shape = rune(line[temp[0]])
+        }
+    }
+    initial_pos := []int{pos[0], pos[1]}
+    g2.curr_pos = []int{pos[0], pos[1]}
+    g2.Update()
+    
+    //Only put the obstacle in visited position in matrix of part 1 onto matrix 2
+    //Test each visited position in matrix 1
+    for i := range matrix2 {
+        for j, char := range matrix2[i] {
+            
+            if char == 'X' {
+                //don't put obstacle at initial position
+                if initial_pos[0] == i && initial_pos[1] == j {
+                    continue
+                }
+
+                //put a new obstacle in matrix2
+                fmt.Printf("Testing Obstruction at (%d, %d)\n", i, j)
+                temp_matrix := copy_matrix(matrix2)
+                temp_matrix[i][j] = '#'
+                
+                //Reset guard position before every loop
+                g2.curr_pos = []int{pos[0],pos[1]} //reset position
+                g2.shape = rune(lines[pos[0]][pos[1]]) //reset shape
+                g2.Update() //reset ahead here
+
+                //run again
+                visited := make(map[string]bool) // Track visited position
+
+                for {
+                    //Capture current pos
+                    position := fmt.Sprintf("%d,%d,%c", g2.curr_pos[0], g2.curr_pos[1], g2.shape)
+                    
+                    //cature loop
+                    if visited[position] {
+                        ans2++
+                        break
+                    }
+                    visited[position] = true
+
+                    //out at left or right
+                    if g2.ahead[0] >= len(temp_matrix) || g2.ahead[0] < 0 {
+                        break
+                    }
+                    //out top or bottom
+                    if g2.ahead[1] >= len(temp_matrix[0]) || g2.ahead[1] < 0 {
+                        break
+                    }
+                    
+                    //Check if there is barrier ahead
+                    if temp_matrix[g2.ahead[0]][g2.ahead[1]] == '#' {
+                        g2.turn_90()
+                    }
+
+                    flag, e := g2.go_forward(temp_matrix)
+                    if flag || e != nil {
+                        break
+                    }
+                    
+                } //Done rune
+            }
+        }
+
+    } // Done test whole matrix
+    fmt.Println("Part 2:", ans2)
+
 }
 
 type guard struct {
@@ -205,7 +283,7 @@ func (g *guard) go_forward(matrix [][]rune) (bool, error) {
         g.curr_pos[1]++
     }
 
-    flag := false
+    var flag = false
     
     //out at left or right
     if g.curr_pos[0] >= len(matrix) || g.curr_pos[0] < 0 {
@@ -217,4 +295,14 @@ func (g *guard) go_forward(matrix [][]rune) (bool, error) {
     }
     g.Update()
     return flag, nil
+}
+
+//helper function to copy matrix
+func copy_matrix (matrix [][]rune) [][]rune {
+    copy_matrix := make([][]rune, len(matrix))
+    for i := range matrix {
+        copy_matrix[i] = make([]rune, len(matrix[i]))
+        copy(copy_matrix[i], matrix[i])
+    }
+    return copy_matrix
 }
