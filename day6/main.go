@@ -118,13 +118,12 @@ func main() {
     //NOTE: Visit the same position with the same direction
 
     matrix2 := copy_matrix(matrix)
-    /**
     for i := range matrix2{
         for _, r := range matrix2[i]{
             fmt.Printf("%c ", r)
         }
         fmt.Println()
-    }*/
+    }
 
     var ans2 = 0
 
@@ -165,21 +164,20 @@ func main() {
                 g2.curr_pos = []int{pos[0],pos[1]} //reset position
                 g2.shape = rune(lines[pos[0]][pos[1]]) //reset shape
                 g2.Update() //reset ahead here
+               // fmt.Println(g2.curr_pos)
 
                 visited := make(map[string]bool) // Tracks directions per position
 
                 //Run
                 for {
-                //Capture current pos
-                    position := fmt.Sprintf("%d,%d,%c", g2.curr_pos[0], g2.curr_pos[1], g2.shape)
-                    
+                    position := fmt.Sprintf("%d , %d , %c", g2.curr_pos[0], g2.curr_pos[1], g2.shape)
                     //cature loop
                     if visited[position] {
                         ans2++
                         break
                     }
                     visited[position] = true
-
+                   
                     //out at left or right
                     if g2.ahead[0] >= len(temp_matrix) || g2.ahead[0] < 0 {
                         break
@@ -192,16 +190,19 @@ func main() {
                     //Check if there is barrier ahead
                     if temp_matrix[g2.ahead[0]][g2.ahead[1]] == '#' {
                         g2.turn_90()
+                        //markPosition(temp_matrix,g2.curr_pos,g2.shape)
                     } else {
                         g2.go_forward(temp_matrix)
                     }
-                    
-                } //Done rune
-            }
-        }
+                } //Done 1 obstacle
+                fmt.Println(visited)
+
+            } //Done 1 line
+        } //Done whole matrix
 
     } // Done test whole matrix
     fmt.Println("Part 2:", ans2)
+
 
 }
 
@@ -304,22 +305,4 @@ func copy_matrix (matrix [][]rune) [][]rune {
         copy(copy_matrix[i], matrix[i])
     }
     return copy_matrix
-}
-
-//helper function to mark position
-func markPosition(matrix [][]rune, pos []int, direction rune) {
-    switch direction {
-    case '^', 'v': // Vertical movement
-        if matrix[pos[0]][pos[1]] == '-' { // Already marked as horizontal
-            matrix[pos[0]][pos[1]] = '+'
-        } else {
-            matrix[pos[0]][pos[1]] = '|'
-        }
-    case '<', '>': // Horizontal movement
-        if matrix[pos[0]][pos[1]] == '|' { // Already marked as vertical
-            matrix[pos[0]][pos[1]] = '+'
-        } else {
-            matrix[pos[0]][pos[1]] = '-'
-        }
-    }
 }
