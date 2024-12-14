@@ -166,17 +166,17 @@ func main() {
                 g2.Update() //reset ahead here
                // fmt.Println(g2.curr_pos)
 
-                visited := make(map[string]bool) // Tracks directions per position
+                visited := make(map[string]int) // Tracks directions per position
 
                 //Run
                 for {
                     position := fmt.Sprintf("%d , %d , %c", g2.curr_pos[0], g2.curr_pos[1], g2.shape)
                     //cature loop
-                    if visited[position] {
+                    if visited[position] >= 5 {
                         ans2++
                         break
                     }
-                    visited[position] = true
+                    visited[position] ++
                    
                     //out at left or right
                     if g2.ahead[0] >= len(temp_matrix) || g2.ahead[0] < 0 {
@@ -195,7 +195,7 @@ func main() {
                         g2.go_forward(temp_matrix)
                     }
                 } //Done 1 obstacle
-                fmt.Println(visited)
+                //fmt.Println(visited)
 
             } //Done 1 line
         } //Done whole matrix
