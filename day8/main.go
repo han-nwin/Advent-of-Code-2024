@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 )
 
@@ -22,6 +21,7 @@ func (m *Matrix) Init (rows [][]string) {
         m.position[i] = make([]string, len(row))
         copy(m.position[i], row)
     }
+
 
 }
 
@@ -64,11 +64,51 @@ func (m *Matrix) addAntiNodes (pos1 [2]int, pos2 [2]int) {
     antiPos := m.antiNodePositions(pos1, pos2)
     for _, node := range antiPos {
         if node[0] >=0 && node[0] < m.numRow && node[1] >=0 && node[1] < m.numCol {
-            m.position[node[0]][node[1]] = "#"
+            if m.position[node[0]][node[1]] != "#" {
+                m.position[node[0]][node[1]] = "#"
+            }
         }
     }
 }
 
+
+func (m *Matrix) antiNodePositions2 (pos1 [2]int, pos2 [2]int) [][2]int {
+    distance := m.distance(pos1,pos2)
+    
+    var anti1Pos [2]int
+    var anti2Pos [2]int
+    var antiPos [][2]int
+
+    
+    anti1Pos[0] = pos1[0] + distance[0]
+    anti1Pos[1] = pos1[1] + distance[1]
+    for anti1Pos[0] >= 0 && anti1Pos[0] < m.numRow && anti1Pos[1] >=0 && anti1Pos[1] < m.numCol {
+        antiPos = append(antiPos,anti1Pos)
+        anti1Pos[0] += distance[0]
+        anti1Pos[1] += distance[1]
+    }
+
+    anti2Pos[0] = pos2[0] - distance[0]
+    anti2Pos[1] = pos2[1] - distance[1]
+    for anti2Pos[0] >= 0 && anti2Pos[0] < m.numRow && anti2Pos[1] >=0 && anti2Pos[1] < m.numCol {
+        antiPos = append(antiPos, anti2Pos)
+        anti2Pos[0] -= distance[0]
+        anti2Pos[1] -= distance[1]
+    }
+
+    return antiPos
+}
+
+func (m *Matrix) addAntiNodes2 (pos1 [2]int, pos2 [2]int) {
+    antiPos := m.antiNodePositions2(pos1, pos2)
+    for _, node := range antiPos {
+        if node[0] >=0 && node[0] < m.numRow && node[1] >=0 && node[1] < m.numCol {
+            if m.position[node[0]][node[1]] != "#" {
+                m.position[node[0]][node[1]] = "#"
+            }
+        }
+    }
+}
 //find all match and return positions array of the matches
 func (m *Matrix) findAllMatch (shape string) [][2]int {
     var matchList [][2]int
@@ -90,10 +130,8 @@ func main() {
         fmt.Println("Error reading file", os.Args[1])
         os.Exit(1)
     }
-    fmt.Println(reflect.TypeOf(data))
 
     lines := strings.Split(strings.TrimSpace(string(data)), "\n") //Array of lines
-    fmt.Println(reflect.TypeOf(lines))
 
     //Getting entries for the matrix
     var entries = make([][]string, len(lines))
@@ -103,7 +141,6 @@ func main() {
 
     var matrix Matrix
     matrix.Init(entries)
-    matrix.display()
 
     var antennaMap = make(map[string][][2]int)
 
@@ -118,7 +155,6 @@ func main() {
             }
         }
     }
-    fmt.Println(antennaMap)
     
     ans1 := 0
 
@@ -131,7 +167,7 @@ func main() {
         }
     }
 
-    matrix.display() 
+    //matrix.display() 
     for _, row := range matrix.position {
         for _, shape := range row {
             if shape == "#"{
@@ -140,4 +176,26 @@ func main() {
         }
     }
     fmt.Println("Part 1: ",ans1)
+
+
+    ans2 := 0
+
+    for _, array := range antennaMap {
+        for i :=0; i < len(array); i++ {
+            for j := i+1; j < len(array); j++ {
+                matrix.addAntiNodes2(array[i], array[j])
+            }
+
+        }
+    }
+
+    //matrix.display() 
+    for _, row := range matrix.position {
+        for _, shape := range row {
+            if shape != "."{
+                ans2++
+            }
+        }
+    }
+    fmt.Println("Part 2: ",ans2)
 }
