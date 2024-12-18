@@ -1,5 +1,6 @@
 #include "iostream"
 #include "fstream"
+#include <unordered_set>
 
 //0: LEFT, 1:RIGHT, 2:UP, 3:DOWN
 enum {
@@ -13,10 +14,31 @@ struct Position {
     std::array<int,2> coordinate;
     std::array<std::array<int,2>,4> surrounding;
     char value;
+    
+    //Default constructor
+    Position() : coordinate{{-1,-1}}, 
+        surrounding{{{-1,-1}, {-1,-1}, {-1, -1}, {-1, -1}}},
+        value(' ') {};
 
     Position(std::array<int,2>& coor, std::array<std::array<int,2>,4>& surr, char value)
     : coordinate(coor), surrounding(surr), value(value) {};
 
+};
+
+//Custom hash funtion for std::array<int,2>
+struct ArrayHasher {
+std::size_t operator()(const std::array<int,2>& arr) const {
+        //Combine the two elements in the array to create a hash
+        //using XOR ^ operator
+        return std::hash<int>()(arr[0]) ^ (std::hash<int>()(arr[1]) << 1);
+    }
+};
+
+//Custom == operator for std::array<int,2>
+struct ArrayEqual {
+    bool operator()(const std::array<int,2>& lhs, const std::array<int,2>& rhs) const {
+        return lhs[0] == rhs[0] && lhs[1] == rhs[1];
+    }
 };
 
 bool is_valid(std::array<int,2> pos, int max_col_idx, int max_row_idx) {
@@ -39,6 +61,7 @@ std::ostream& operator<<(std::ostream& os, const Position& position) {
     os << "]";
     return os;
 }
+
 
 int main(int argc, char* argv[]) {
     //GET INPUT FILE into string []
@@ -63,20 +86,25 @@ int main(int argc, char* argv[]) {
         std::cout << line << std::endl;
     }
     
-    std::vector<Position> records;
+    std::unordered_map<std::array<int,2>,Position, ArrayHasher, ArrayEqual> records;//Store all positions
+    std::vector<Position> starts;//Store starting positions
 
     for (int l = 0; l < lines.size(); l++) {
         for (int i = 0; i < lines[l].length(); i++) {
-            if (lines[l][i] == '0') {
-                std::array<int,2> coordinate = {l, i};
-                std::array<std::array<int, 2>, 4> surrounding = {{
-                    {l, i - 1}, 
-                    {l, i + 1}, 
-                    {l - 1, i}, 
-                    {l + 1, i}
-                }};
-                records.emplace_back(coordinate,surrounding,'0');
+            std::array<int,2> coordinate = {l, i};
+            std::array<std::array<int, 2>, 4> surrounding = {{
+                {l, i - 1}, 
+                {l, i + 1}, 
+                {l - 1, i}, 
+                {l + 1, i}
+            }};
+            char value = lines[l][i];
+            Position new_record{coordinate, surrounding, value};
+            records[coordinate] = new_record;
+            if (value == '0') {
+                starts.emplace_back(coordinate,surrounding,'0');
             }
+            
         }
     }
 
@@ -84,9 +112,9 @@ int main(int argc, char* argv[]) {
     int max_col_idx = lines[0].length() - 1;
     std::cout << max_col_idx << " " << max_row_idx << std::endl;
 
-    for (const auto & record : records) {
-        std::cout << record << std::endl;
-        for (const auto& surr : record.surrounding) {
+    for (const auto & pair : records) {
+        std::cout << pair.second << std::endl;
+        for (const auto& surr :pair.second.surrounding) {
             if (is_valid(surr, max_col_idx, max_row_idx)) {
                 std::cout << "Valid ";
             } else {
@@ -98,6 +126,61 @@ int main(int argc, char* argv[]) {
     }
 
     //NOTE:Implement BFS for path finding
+
+    int ans1 = 0;
+
+    for (const Position& start : starts) {
+        std::queue<Position> queue;
+        queue.push(start);
+
+        bool flag = false;
+        int count = 0;
+
+        std::unordered_set<std::array<int,2>, ArrayHasher, ArrayEqual> visited;
+
+        while (!queue.empty()) {
+            Position pos = queue.front();
+            queue.pop();
+
+            //Skip visited position
+            if (visited.find(pos.coordinate) != visited.end()) {
+                continue;
+            }
+            visited.insert(pos.coordinate);
+
+            if (pos.value == '9') {
+                flag = true;
+                count++;
+            }
+            
+            //Validate the surrounding
+            if (is_valid(pos.surrounding[LEFT], max_col_idx, max_row_idx) 
+                    && records[pos.surrounding[LEFT]].value == (pos.value + 1)){
+                queue.push(records[pos.surrounding[LEFT]]); //Push the element in the queue
+            } 
+            if (is_valid(pos.surrounding[RIGHT], max_col_idx, max_row_idx) 
+                    && records[pos.surrounding[RIGHT]].value == (pos.value + 1)){
+                queue.push(records[pos.surrounding[RIGHT]]); //Push the element in the queue
+            } 
+            if (is_valid(pos.surrounding[UP], max_col_idx, max_row_idx) 
+                    && records[pos.surrounding[UP]].value == (pos.value + 1)){
+                queue.push(records[pos.surrounding[UP]]); //Push the element in the queue
+            } 
+            if (is_valid(pos.surrounding[DOWN], max_col_idx, max_row_idx) 
+                    && records[pos.surrounding[DOWN]].value == (pos.value + 1)){
+                queue.push(records[pos.surrounding[DOWN]]); //Push the element in the queue
+            } 
+        }
+
+        if (flag) {
+            std::cout << "FOUND" << std::endl;
+            std::cout << count << std::endl;
+            ans1 += count;
+        }
+
+    }
+
+    std::cout << "Answer 1: " << ans1 << std::endl;
 
 
     return 0;
