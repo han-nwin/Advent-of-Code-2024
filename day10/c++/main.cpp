@@ -1,6 +1,10 @@
-#include "iostream"
-#include "fstream"
+#include <iostream>
+#include <fstream>
 #include <unordered_set>
+#include <array>
+#include <vector>
+#include <unordered_map>
+#include <queue>
 
 //0: LEFT, 1:RIGHT, 2:UP, 3:DOWN
 enum {
@@ -81,10 +85,6 @@ int main(int argc, char* argv[]) {
         lines.emplace_back(line);
     }
     file.close();
-
-    for (const auto & line : lines) {
-        std::cout << line << std::endl;
-    }
     
     std::unordered_map<std::array<int,2>,Position, ArrayHasher, ArrayEqual> records;//Store all positions
     std::vector<Position> starts;//Store starting positions
@@ -110,20 +110,6 @@ int main(int argc, char* argv[]) {
 
     int max_row_idx = lines.size() - 1;
     int max_col_idx = lines[0].length() - 1;
-    std::cout << max_col_idx << " " << max_row_idx << std::endl;
-
-    for (const auto & pair : records) {
-        std::cout << pair.second << std::endl;
-        for (const auto& surr :pair.second.surrounding) {
-            if (is_valid(surr, max_col_idx, max_row_idx)) {
-                std::cout << "Valid ";
-            } else {
-                std::cout << "Not-Valid ";
-            }
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
-    }
 
     //NOTE:Implement BFS for path finding
 
@@ -151,6 +137,7 @@ int main(int argc, char* argv[]) {
             if (pos.value == '9') {
                 flag = true;
                 count++;
+                continue;
             }
             
             //Validate the surrounding
@@ -173,14 +160,76 @@ int main(int argc, char* argv[]) {
         }
 
         if (flag) {
-            std::cout << "FOUND" << std::endl;
-            std::cout << count << std::endl;
             ans1 += count;
         }
 
     }
 
     std::cout << "Answer 1: " << ans1 << std::endl;
+
+    //NOTE: PART 2:
+
+    int ans2 = 0;
+
+    for (const Position& start : starts) {
+        //Pair of Position and it's coordinate. Use coordinate to make unique path later
+        std::queue<std::pair<Position, std::unordered_set<std::array<int,2>, ArrayHasher, ArrayEqual>>> queue;
+
+        queue.push({start, {start.coordinate}});
+
+        bool flag = false;
+        int count = 0;
+
+        while (!queue.empty()) {
+            auto[pos, path] = queue.front();
+            queue.pop();
+
+
+            if (pos.value == '9') {
+                flag = true;
+                count++;
+                continue;
+            }
+            
+            //Validate the surrounding
+            if (is_valid(pos.surrounding[LEFT], max_col_idx, max_row_idx) 
+                    && records[pos.surrounding[LEFT]].value == (pos.value + 1)
+                    && path.find(pos.surrounding[LEFT]) == path.end()) {
+
+                auto new_path = path;
+                queue.push({records[pos.surrounding[LEFT]], new_path}); //Push the element in the queue
+            }
+            if (is_valid(pos.surrounding[RIGHT], max_col_idx, max_row_idx) 
+                    && records[pos.surrounding[RIGHT]].value == (pos.value + 1)
+                    && path.find(pos.surrounding[RIGHT]) == path.end()) {
+
+                auto new_path = path;
+                queue.push({records[pos.surrounding[RIGHT]], new_path}); //Push the element in the queue
+            }
+            if (is_valid(pos.surrounding[UP], max_col_idx, max_row_idx) 
+                    && records[pos.surrounding[UP]].value == (pos.value + 1)
+                    && path.find(pos.surrounding[UP]) == path.end()) {
+
+                auto new_path = path;
+                queue.push({records[pos.surrounding[UP]], new_path}); //Push the element in the queue
+            }
+            if (is_valid(pos.surrounding[DOWN], max_col_idx, max_row_idx) 
+                    && records[pos.surrounding[DOWN]].value == (pos.value + 1)
+                    && path.find(pos.surrounding[DOWN]) == path.end()) {
+
+                auto new_path = path;
+                queue.push({records[pos.surrounding[DOWN]], new_path}); //Push the element in the queue
+            }
+
+        }
+
+        if (flag) {
+            ans2 += count;
+        }
+
+    }
+
+    std::cout << "Answer 2: " << ans2 << std::endl;
 
 
     return 0;
