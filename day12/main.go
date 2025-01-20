@@ -33,8 +33,7 @@ func (f *Fence) perimeter() int {
 
 // TODO: Sides calculates the number of sides for the fence
 func (f *Fence) sides() int {
-    sides := 0
-    return sides
+
 }
 
 func main() {
@@ -90,7 +89,7 @@ func main() {
 	var floodFill func(i, j int, kind rune) Fence
 	floodFill = func(i, j int, kind rune) Fence {
 		stack := [][2]int{{i, j}}
-        fence := Fence{}
+		fence := Fence{}
 
 		for len(stack) > 0 {
 			// Pop a location from the stack
@@ -136,13 +135,13 @@ func main() {
 	}
 
 	ans1 := 0
-    ans2 := 0
+	ans2 := 0
 	// Print the results
 	fmt.Println("\nFences:")
 	for i, fence := range fences {
 		fmt.Printf("Fence %d: Area = %d, Perimeter = %d, Sides = %d\n", i+1, fence.area(), fence.perimeter(), fence.sides())
 		ans1 += fence.area() * fence.perimeter()
-        ans2 += fence.area() * fence.sides()
+		ans2 += fence.area() * fence.sides()
 	}
 
 	fmt.Println("ANSWER 1: ", ans1)
